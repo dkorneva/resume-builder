@@ -36,7 +36,7 @@ const ResumePreview = ({data, template, accentColor, classes = ""}) => {
           overflow: hidden;
         }
         body * {
-          viisibility: hidden;
+          visibility: hidden;
         }
         #resume-preview, #resume-preview * {
           visibility: visible;
