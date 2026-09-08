@@ -5,7 +5,7 @@ import {
 	getUserById,
 	getUserResumes,
 } from '../controllers/userController.js'
-import protect from '../middleware/authMiddleware.js'
+import protect from '../middlewares/middleware.js'
 
 const userRouter = express.Router();
 
