@@ -92,7 +92,19 @@ export const updateResume = async (req, res) => {
     const {resumeId, resumeData, removeBackground} = req.body
     const image = req.file
 
-    let resumeDataCopy = JSON.parse(JSON.stringify(resumeData))
+    let resumeDataCopy
+
+    if (typeof resumeData === 'string') {
+      resumeDataCopy = await JSON.parse(resumeData)
+    } else {
+      resumeDataCopy = structuredClone(resumeData)
+    }
+
+    delete resumeDataCopy._id
+    delete resumeDataCopy.userId
+    delete resumeDataCopy.createdAt
+    delete resumeDataCopy.updatedAt
+    delete resumeDataCopy.__v
 
     if (image) {
 
@@ -100,17 +112,20 @@ export const updateResume = async (req, res) => {
 
       const response = await imagekit.files.upload({
 				file: imageBufferData,
-				fileName: 'resume.jpg',
+				fileName: `resume-${resumeId}-${Date.now()}.jpg`,
 				folder: 'user-resumes',
 				transformation: {
 					pre: 'w-300,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : ''),
 				},
 			})
 
-      resumeDataCopy.personal_info.image = response.url // live url of uploaded image
+      const transformation = 'w-300,h-300,fo-face,z-0.75' + (removeBackground ? ',e-bgremove' : '')
+      const transformedImageUrl = response.url.replace('/user-resumes/', `/tr:${transformation}/user-resumes/`)
+
+      resumeDataCopy.personal_info.image = transformedImageUrl // live url of uploaded image
     }
 
-    const resume = await Resume.findByIdAndUpdate({userId, _id: resumeId}, resumeDataCopy, {new: true})
+    const resume = await Resume.findOneAndUpdate({userId, _id: resumeId}, {$set: resumeDataCopy}, {new: true})
 
     return res.status(200).json({message: "Saved successfully", resume})
   } catch (error) {

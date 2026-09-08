@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from "lucide-react";
 
 const ProjectForm = ({data, onChange}) => {
+  const projects = data || []
 
   const addProject = () => {
 		const newProject = {
@@ -8,16 +9,16 @@ const ProjectForm = ({data, onChange}) => {
 			type: '',
 			description: '',
 		}
-		onChange([...data, newProject])
+		onChange([...projects, newProject])
 	}
 
 	const removeProject = index => {
-		const updated = data.filter((_, i) => i !== index)
+		const updated = projects.filter((_, i) => i !== index)
 		onChange(updated)
 	}
 
 	const updateProject = (index, field, value) => {
-		const updated = [...data]
+		const updated = [...projects]
 		updated[index] = { ...updated[index], [field]: value }
 		onChange(updated)
 	}
@@ -41,7 +42,7 @@ const ProjectForm = ({data, onChange}) => {
 			</div>
 
 				<div className='space-y-4 mt-6'>
-					{data.map((project, index) => (
+					{projects.map((project, index) => (
 						<div
 							key={index}
 							className='p-4 border border-gray-200 rounded-lg space-y-3'
