@@ -3,8 +3,16 @@ import { Mail, Phone, MapPin } from "lucide-react";
 const MinimalImageTemplate = ({ data, accentColor }) => {
     const formatDate = (dateStr) => {
         if (!dateStr) return "";
+        if (dateStr.toLowerCase() === "present") return "Present";
+        if (/^\d{4}$/.test(dateStr)) return dateStr;
+        if (!/^\d{4}-\d{2}$/.test(dateStr)) return dateStr;
+
         const [year, month] = dateStr.split("-");
-        return new Date(year, month - 1).toLocaleDateString("en-US", {
+        const date = new Date(year, month - 1);
+
+        if (Number.isNaN(date.getTime())) return dateStr;
+
+        return date.toLocaleDateString("en-US", {
             year: "numeric",
             month: "short",
         });
