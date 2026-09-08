@@ -3,6 +3,7 @@ import {
 	loginUser,
 	registerUser,
 	getUserById,
+	getUserResumes,
 } from '../controllers/userController.js'
 import protect from '../middleware/authMiddleware.js'
 
@@ -10,6 +11,7 @@ const userRouter = express.Router();
 
 userRouter.post('/register', registerUser)
 userRouter.post('/login', loginUser)
-userRouter.post('/data', getUserById)
+userRouter.get('/data', protect, getUserById)
+userRouter.get('/resumes', protect, getUserResumes)
 
 export default userRouter
