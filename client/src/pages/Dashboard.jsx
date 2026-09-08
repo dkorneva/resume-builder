@@ -9,7 +9,7 @@ import {
     XIcon,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { data, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../configs/api';
 import { toast } from 'react-hot-toast';
@@ -81,14 +81,33 @@ const loadAllResumes = async () => {
   }
 
   const editTitle = async (event) => {
-    event.preventDefault()
+		try {
+			event.preventDefault()
+			const {data} = await api.put(`/api/resumes/update`, {resumeId: editResumeId, resumeData: {title}}, {headers: {
+				Authorization: token
+			}})
+			setAllResumes(allResumes.map(resume => resume._id === editResumeId ? {...resume, title} : resume))
+			setTitle('')
+			setEditResumeId('')
+			toast.success(data.message)
+		} catch (error) {
+			toast.error(error?.response?.data?.message || error.message)
+		}
   }
 
   const deleteResume = async (resumeId) => {
-    const confirm = window.confirm('Are you sure you want to delete this resume?')
-    if(confirm) {
-      setAllResumes(prev => prev.filter(resume => resume._id !== resumeId))
-    }
+		try {
+			const confirm = window.confirm('Are you sure you want to delete this resume?')
+			if(confirm) {
+				const {data} = await api.delete(`/api/resumes/delete/${resumeId}`, {headers: {
+					Authorization: token
+				}})
+				setAllResumes(allResumes.filter(resume => resume._id !== resumeId))
+				toast.success(data.message)
+			}
+		} catch (error) {
+			toast.error(error?.response?.data?.message || error.message)
+		}
   }
 
 	useEffect(() => {
@@ -254,7 +273,7 @@ const loadAllResumes = async () => {
 									onChange={e => setResume(e.target.files[0])}
 								></input>
 							</div>
-							<button className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors'>
+							<button disabled={isLoading} className='w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center justify-center gap-2'>
 								{isLoading && (
 									<LoaderCircleIcon className='animate-spin size-4 text-spin' />
 								)}

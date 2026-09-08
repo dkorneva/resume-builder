@@ -4,6 +4,15 @@
 import ai from '../configs/ai.js'
 import Resume from '../models/Resume.js'
 
+const parseJsonFromAiResponse = content => {
+	const cleanedContent = content
+		.trim()
+		.replace(/^```(?:json)?\s*/i, '')
+		.replace(/\s*```$/i, '')
+
+	return JSON.parse(cleanedContent)
+}
+
 export const enhanceProfessionalSummary = async (req, res) => {
 	try {
 		const { userContent } = req.body
@@ -82,11 +91,12 @@ export const uploadResume = async (req, res) => {
 
 		const userPrompt = `extract data from this resume: ${resumeText}
     
-    Provide data in the following JSON format with no additional text before or after:
+    Return only valid JSON with no markdown, no code fences, and no additional text before or after.
+    Use the following JSON shape:
     
     {
     professional_summary: { type: String, default: '' },
-		skills: { type: String },
+		skills: [],
 		personal_info: {
 			image: { type: String, default: '' },
 			full_name: { type: String, default: '' },
@@ -137,11 +147,12 @@ export const uploadResume = async (req, res) => {
 					content: userPrompt,
 				},
 			],
+			max_tokens: 4000,
 		})
 
 		const extractedData = response.choices[0].message.content
 
-		const parsedData = JSON.parse(extractedData)
+		const parsedData = parseJsonFromAiResponse(extractedData)
 
 		const newResume = await Resume.create({ userId, title, ...parsedData })
 		res.json({ resumeId: newResume._id })

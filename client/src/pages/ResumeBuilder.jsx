@@ -1,5 +1,4 @@
 import { Link, useParams } from "react-router-dom";
-import { dummyResumeData } from "../assets/assets";
 import { useEffect, useState } from "react";
 import { ArrowLeftIcon, Briefcase, ChevronLeft, ChevronRight, DownloadIcon, EyeIcon, EyeOffIcon, FileText, FolderIcon, GraduationCap, Share2Icon, Sparkles, User } from "lucide-react";
 import PersonalInfoForm from "../components/PersonalInfoForm";
@@ -11,10 +10,13 @@ import ExperienceForm from "../components/ExperienceForm";
 import EducationForm from "../components/EducationForm";
 import ProjectsForm from "../components/ProjectForm";
 import SkillsForm from "../components/SkillsForm";
+import { useSelector } from "react-redux";
+import api from "../configs/api";
 
 const ResumeBuilder = () => {
 
   const {resumeId} = useParams() // allows to get dynamic params from the current url address
+	const {token} = useSelector(state => state.auth)
 
   const [resumeData, setResumeData] = useState({
     _id: '',
@@ -31,11 +33,15 @@ const ResumeBuilder = () => {
   })
 
   const loadExistingResume = async () => {
-    const resume = dummyResumeData.find(resume => resumeId === resume._id)
-    if (resume) {
-      setResumeData(resume)
-      document.title = resume.title // change tab title
-    }
+    try {
+			const {data} = await api.get('/api/resumes/get/' + resumeId, {headers: {Authorization: token}})
+			if (data.resume) {
+				setResumeData(data.resume) 
+				document.title = data.resume.title
+			}
+		} catch (error) {
+			console.log(error.message)
+		}
   }
 
   const [activeSectionIndex, setActiveSectionIndex] = useState(0)

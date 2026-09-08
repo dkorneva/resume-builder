@@ -55,6 +55,13 @@ export const getResumeById = async (req, res) => {
     resume.createdAt = undefined
     resume.updatedAt = undefined
 
+    if (typeof resume.skills === 'string') {
+      resume.skills = resume.skills
+        .split(',')
+        .map(skill => skill.trim())
+        .filter(Boolean)
+    }
+
     return res.status(200).json({resume})
   } catch (error) {
     return res.status(400).json({ message: error.message })
@@ -85,7 +92,7 @@ export const updateResume = async (req, res) => {
     const {resumeId, resumeData, removeBackground} = req.body
     const image = req.file
 
-    let resumeDataCopy = JSON.parse(resumeData)
+    let resumeDataCopy = JSON.parse(JSON.stringify(resumeData))
 
     if (image) {
 
